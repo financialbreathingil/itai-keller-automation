@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>חיבור דף פייסבוק</title>
+<meta name="description" content="חיבור עמוד הפייסבוק של העסק למערכת המענה, דרך מסך ההרשאות הרשמי של מטא.">
+<style>
+  :root{--ink:#15202b;--muted:#5b6b7c;--line:#e3e8ee;--bg:#fff;--soft:#f6f8fa;
+        --accent:#1877f2;--accent-ink:#fff;--ok:#2f6f4e;--warnbg:#fffbeb;--warnline:#d97706}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);direction:rtl;
+       font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 60px}
+  h1{font-size:26px;margin:0 0 8px}
+  .lede{color:var(--muted);margin:0 0 28px}
+  .card{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px}
+  .card h2{font-size:17px;margin:0 0 10px}
+  ul,ol{margin:0;padding-inline-start:20px}
+  li{margin-bottom:8px}
+  li b{font-weight:700}
+  button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;
+         padding:14px 26px;font-size:17px;font-weight:700;cursor:pointer}
+  button:hover{filter:brightness(.95)}
+  button:disabled{opacity:.5;cursor:default}
+  button.ghost{background:#fff;color:var(--ink);border:1px solid var(--line);font-size:15px;padding:10px 18px}
+  #out{white-space:pre-wrap;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:16px;
+       font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:18px;min-height:64px;
+       direction:ltr;text-align:left;word-break:break-all}
+  .done{border-inline-start:4px solid var(--ok);background:#f0f7f3;padding:14px 16px;border-radius:8px;
+        margin-top:16px;display:none}
+  .done.show{display:block}
+  .note{border-inline-start:4px solid var(--warnline);background:var(--warnbg);padding:12px 14px;
+        border-radius:8px;margin-top:16px}
+  .en{direction:ltr;text-align:left;color:var(--muted);font-size:14px;border-top:1px solid var(--line);
+      margin-top:34px;padding-top:18px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>חיבור דף הפייסבוק של העסק</h1>
+  <p class="lede">החיבור נעשה דרך מסך ההרשאות הרשמי של מטא. אתם בוחרים בעצמכם איזה דף לחבר, ואפשר לנתק בכל רגע.</p>
+
+  <div class="card">
+    <h2>מה המערכת תוכל לעשות אחרי החיבור</h2>
+    <ul>
+      <li><b>לראות את רשימת הדפים שאתם מנהלים</b>, כדי שתבחרו את הדף הנכון. אנחנו שומרים רק את הדף שבחרתם.</li>
+      <li><b>לקרוא תגובות</b> שאנשים כותבים מתחת לפוסטים ולמודעות של הדף.</li>
+      <li><b>לפרסם תגובה אחת</b> מתחת לתגובה של מי ששאל על העסק, שמפנה אותו לוואטסאפ שלכם.</li>
+    </ul>
+    <p style="margin:12px 0 0;color:var(--muted)">המערכת לא כותבת פוסטים, לא מוחקת תגובות של אחרים ולא נוגעת
+      בהגדרות הדף.</p>
+  </div>
+
+  <div class="card">
+    <h2>לפני שמתחילים</h2>
+    <ol>
+      <li>להתחבר לפייסבוק עם החשבון האישי ש<b>מנהל</b> את הדף.</li>
+      <li>במסך של מטא לבחור את תיק העסק שהדף שייך אליו, ואז לסמן את הדף.</li>
+      <li>לאשר את שלוש ההרשאות שמופיעות למעלה.</li>
+    </ol>
+  </div>
+
+  <button id="go" disabled>מתחבר לפייסבוק...</button>
+  <button id="copy" class="ghost" style="display:none">העתקת הקוד</button>
+
+  <div class="done" id="done">
+    <b>החיבור הושלם.</b> נשאר רק לשלוח לנו את הקוד שמופיע למטה, בוואטסאפ או במייל
+    <a href="mailto:financialbreathingil@gmail.com">financialbreathingil@gmail.com</a>,
+    ואנחנו מסיימים את ההגדרה מהצד שלנו. הקוד תקף לזמן קצר, אז עדיף לשלוח עכשיו.
+  </div>
+
+  <div class="note">
+    אם מסך ההרשאות לא נפתח, כנראה חוסם החלונות הקופצים של הדפדפן חסם אותו. לאשר חלונות קופצים לאתר הזה
+    וללחוץ שוב.
+  </div>
+
+  <div id="out">ממתין.</div>
+
+  <div class="en">
+    <p><b>For reference.</b> This page connects a business's own Facebook Page to our messaging automation
+    through Meta's Facebook Login for Business dialog. The business owner signs in with their own account,
+    picks the Page they manage and grants <code>pages_show_list</code>, <code>pages_read_user_content</code>
+    and <code>pages_manage_engagement</code>. We then read comments on that Page's posts and publish one public
+    reply under a comment that asks about the business, pointing the person to the business's WhatsApp number
+    where a human answers. Access can be revoked by the owner at any time in their Meta business settings.
+    See our <a href="../privacy.html">privacy policy</a>.</p>
+  </div>
+</div>
+
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+<script>
+  var APP_ID = "2003930913654951";
+  var CONFIG_ID = "1080642694339632";   // Page connect, system-user token, Pages asset
+  var out = document.getElementById("out");
+  var go = document.getElementById("go");
+  var copyBtn = document.getElementById("copy");
+  var doneBox = document.getElementById("done");
+  var code = "";
+
+  function log(line) { out.textContent += "\n" + line; }
+
+  window.fbAsyncInit = function () {
+    FB.init({ appId: APP_ID, cookie: true, xfbml: false, version: "v23.0" });
+    go.disabled = false;
+    go.textContent = "חיבור דף הפייסבוק";
+    out.textContent = "מוכן. לוחצים על הכפתור.";
+  };
+
+  // אם ה-SDK לא נטען כלל, שלא יישאר כפתור מת
+  setTimeout(function () {
+    if (go.disabled) {
+      go.textContent = "פייסבוק לא נטענה";
+      out.textContent = "לא הצלחנו לטעון את פייסבוק. לרענן את הדף, ואם זה חוזר לכתוב לנו.";
+    }
+  }, 8000);
+
+  copyBtn.addEventListener("click", function () {
+    navigator.clipboard.writeText(code).then(function () {
+      copyBtn.textContent = "הקוד הועתק";
+      setTimeout(function () { copyBtn.textContent = "העתקת הקוד"; }, 2500);
+    });
+  });
+
+  go.addEventListener("click", function () {
+    out.textContent = "נפתח חלון של פייסבוק...";
+    doneBox.classList.remove("show");
+    copyBtn.style.display = "none";
+    FB.login(function (response) {
+      if (response.authResponse && response.authResponse.code) {
+        code = response.authResponse.code;
+        log("PAGE_CONNECT_CODE " + code);
+        doneBox.classList.add("show");
+        copyBtn.style.display = "inline-block";
+        go.textContent = "חיבור דף נוסף";
+      } else if (response.status === "unknown") {
+        log("החלון נסגר בלי לאשר. אפשר ללחוץ שוב.");
+      } else {
+        log("לא התקבל קוד. סטטוס: " + response.status);
+      }
+    }, {
+      config_id: CONFIG_ID,
+      response_type: "code",
+      override_default_response_type: true
+    });
+  });
+</script>
+</body>
+</html>
