@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="he">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>חיבור מספר וואטסאפ עסקי</title>
+<meta name="robots" content="noindex">
+<style>
+  :root{--ink:#15202b;--muted:#5b6b7c;--line:#e3e8ee;--bg:#fff;--soft:#f6f8fa;--accent:#25d366;--accent-ink:#0b3d24}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);direction:rtl;
+       font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .wrap{max-width:720px;margin:0 auto;padding:40px 20px 60px}
+  h1{font-size:26px;margin:0 0 8px}
+  .lede{color:var(--muted);margin:0 0 28px}
+  .card{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:20px;margin-bottom:18px}
+  .card h2{font-size:17px;margin:0 0 10px}
+  ol{margin:0;padding-inline-start:20px}
+  li{margin-bottom:8px}
+  button{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;
+         padding:14px 26px;font-size:17px;font-weight:700;cursor:pointer}
+  button:hover{filter:brightness(.95)}
+  button:disabled{opacity:.5;cursor:default}
+  #out{white-space:pre-wrap;background:#0f172a;color:#e2e8f0;border-radius:10px;padding:16px;
+       font:13px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;margin-top:18px;min-height:64px;direction:ltr;text-align:left}
+  .warn{border-inline-start:4px solid #d97706;background:#fffbeb;padding:12px 14px;border-radius:8px;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>חיבור מספר וואטסאפ עסקי</h1>
+  <p class="lede">חיבור במצב קואקסיסטנס: המספר ממשיך לעבוד באפליקציה בטלפון, ובמקביל המערכת יכולה לקרוא ולשלוח.</p>
+
+  <div class="card">
+    <h2>לפני שמתחילים</h2>
+    <ol>
+      <li>המספר חייב להיות כרגע באפליקציית <strong>WhatsApp Business</strong> בטלפון, לא בוואטסאפ הרגיל.</li>
+      <li>המספר לא מחובר כבר ל-Cloud API בשום מקום.</li>
+      <li>הטלפון ביד, כי בסוף התהליך סורקים קוד QR מתוך האפליקציה.</li>
+    </ol>
+  </div>
+
+  <button id="go" disabled>מתחבר לפייסבוק...</button>
+
+  <div class="warn">
+    אם מסך החיבור מציע אימות בקוד SMS במקום סריקת QR, זה המסלול הלא נכון: הוא מעביר את המספר
+    ל-Cloud API ומנתק את האפליקציה בטלפון. לסגור את החלון ולעצור.
+  </div>
+
+  <div id="out">ממתין.</div>
+</div>
+
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+<script>
+  var APP_ID = "2003930913654951";
+  var CONFIG_ID = "2251168299075304";
+  var out = document.getElementById("out");
+  var go = document.getElementById("go");
+
+  function log(line) { out.textContent += "\n" + line; }
+
+  window.fbAsyncInit = function () {
+    FB.init({ appId: APP_ID, cookie: true, xfbml: false, version: "v23.0" });
+    go.disabled = false;
+    go.textContent = "התחלת חיבור";
+    out.textContent = "מוכן. לוחצים על הכפתור.";
+  };
+
+  // מטא שולחת את פרטי החיבור דרך postMessage ולא בתשובת ה-login
+  window.addEventListener("message", function (event) {
+    if (!/facebook\.com$/.test(new URL(event.origin).hostname)) return;
+    try {
+      var data = JSON.parse(event.data);
+      if (data.type !== "WA_EMBEDDED_SIGNUP") return;
+      if (data.event === "FINISH" || data.event === "FINISH_ONLY_WABA") {
+        log("הסתיים. WABA: " + (data.data && data.data.waba_id) +
+            " | מספר: " + (data.data && data.data.phone_number_id));
+      } else if (data.event === "CANCEL") {
+        log("בוטל בשלב: " + (data.data && data.data.current_step));
+      } else if (data.event === "ERROR") {
+        log("שגיאה: " + JSON.stringify(data.data));
+      }
+    } catch (e) { /* הודעות אחרות של פייסבוק, לא שלנו */ }
+  });
+
+  go.addEventListener("click", function () {
+    out.textContent = "נפתח חלון של פייסבוק...";
+    FB.login(function (response) {
+      if (response.authResponse && response.authResponse.code) {
+        log("התקבל קוד הרשאה. להעתיק את השורה הבאה ולהעביר לקלוד:");
+        log("CODE " + response.authResponse.code);
+      } else {
+        log("לא התקבל קוד. סטטוס: " + response.status);
+      }
+    }, {
+      config_id: CONFIG_ID,
+      response_type: "code",
+      override_default_response_type: true,
+      extras: {
+        setup: {},
+        featureType: "whatsapp_business_app_onboarding",   // קואקסיסטנס
+        sessionInfoVersion: "3"
+      }
+    });
+  });
+</script>
+</body>
+</html>
