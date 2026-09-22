@@ -62,7 +62,7 @@
     </ol>
   </div>
 
-  <button id="go" disabled>מתחבר לפייסבוק...</button>
+  <button id="go">חיבור דף הפייסבוק</button>
   <button id="copy" class="ghost" style="display:none">העתקת הקוד</button>
 
   <div class="done" id="done">
@@ -72,8 +72,7 @@
   </div>
 
   <div class="note">
-    אם מסך ההרשאות לא נפתח, כנראה חוסם החלונות הקופצים של הדפדפן חסם אותו. לאשר חלונות קופצים לאתר הזה
-    וללחוץ שוב.
+    הלחיצה מעבירה אתכם לפייסבוק ומחזירה לכאן בסיום. אם משהו נתקע באמצע, אפשר לחזור לעמוד הזה וללחוץ שוב.
   </div>
 
   <div id="out">ממתין.</div>
@@ -89,10 +88,11 @@
   </div>
 </div>
 
-<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
 <script>
-  var APP_ID = "2003930913654951";
+  var APP_ID    = "2003930913654951";
   var CONFIG_ID = "1080642694339632";   // Page connect, system-user token, Pages asset
+  var REDIRECT  = "https://financialbreathingil.github.io/itai-keller-automation/connect-page/";
+
   var out = document.getElementById("out");
   var go = document.getElementById("go");
   var copyBtn = document.getElementById("copy");
@@ -101,20 +101,51 @@
 
   function log(line) { out.textContent += "\n" + line; }
 
-  window.fbAsyncInit = function () {
-    FB.init({ appId: APP_ID, cookie: true, xfbml: false, version: "v23.0" });
-    go.disabled = false;
-    go.textContent = "חיבור דף הפייסבוק";
-    out.textContent = "מוכן. לוחצים על הכפתור.";
-  };
+  // מסלול הפניה ולא חלון קופץ. חלון קופץ של ה-SDK נחסם בכרום ומחזיר URL Blocked,
+  // וגם נופל בטלפון. ההפניה משתמשת בכתובת שרשומה כ-Valid OAuth Redirect URI.
+  function startLogin() {
+    var state = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    try { sessionStorage.setItem("pc_state", state); } catch (e) { /* גלישה פרטית */ }
+    var url = "https://www.facebook.com/v23.0/dialog/oauth"
+            + "?client_id=" + APP_ID
+            + "&config_id=" + CONFIG_ID
+            + "&response_type=code"
+            + "&redirect_uri=" + encodeURIComponent(REDIRECT)
+            + "&state=" + state;
+    out.textContent = "מעבירים אותך לפייסבוק...";
+    window.location.assign(url);
+  }
 
-  // אם ה-SDK לא נטען כלל, שלא יישאר כפתור מת
-  setTimeout(function () {
-    if (go.disabled) {
-      go.textContent = "פייסבוק לא נטענה";
-      out.textContent = "לא הצלחנו לטעון את פייסבוק. לרענן את הדף, ואם זה חוזר לכתוב לנו.";
+  function showCode(value) {
+    code = value;
+    out.textContent = "PAGE_CONNECT_CODE " + code;
+    doneBox.classList.add("show");
+    copyBtn.style.display = "inline-block";
+    go.textContent = "חיבור דף נוסף";
+  }
+
+  function readReturn() {
+    var q = new URLSearchParams(window.location.search);
+    if (!q.has("code") && !q.has("error")) return false;
+
+    var saved = null;
+    try { saved = sessionStorage.getItem("pc_state"); } catch (e) { /* בלי אחסון */ }
+    // מנקים את הכתובת כדי שהקוד לא יישאר בהיסטוריית הדפדפן
+    history.replaceState({}, "", window.location.pathname);
+
+    if (q.has("error")) {
+      out.textContent = "החיבור לא הושלם.";
+      log(q.get("error_description") || q.get("error"));
+      log("אפשר ללחוץ על הכפתור ולנסות שוב.");
+      return true;
     }
-  }, 8000);
+    if (saved && q.get("state") !== saved) {
+      out.textContent = "החיבור נעצר מסיבת אבטחה: הבקשה לא תואמת. ללחוץ שוב ולהתחיל מחדש.";
+      return true;
+    }
+    showCode(q.get("code"));
+    return true;
+  }
 
   copyBtn.addEventListener("click", function () {
     navigator.clipboard.writeText(code).then(function () {
@@ -123,28 +154,8 @@
     });
   });
 
-  go.addEventListener("click", function () {
-    out.textContent = "נפתח חלון של פייסבוק...";
-    doneBox.classList.remove("show");
-    copyBtn.style.display = "none";
-    FB.login(function (response) {
-      if (response.authResponse && response.authResponse.code) {
-        code = response.authResponse.code;
-        log("PAGE_CONNECT_CODE " + code);
-        doneBox.classList.add("show");
-        copyBtn.style.display = "inline-block";
-        go.textContent = "חיבור דף נוסף";
-      } else if (response.status === "unknown") {
-        log("החלון נסגר בלי לאשר. אפשר ללחוץ שוב.");
-      } else {
-        log("לא התקבל קוד. סטטוס: " + response.status);
-      }
-    }, {
-      config_id: CONFIG_ID,
-      response_type: "code",
-      override_default_response_type: true
-    });
-  });
+  go.addEventListener("click", startLogin);
+  if (!readReturn()) out.textContent = "מוכן. לוחצים על הכפתור.";
 </script>
 </body>
 </html>
