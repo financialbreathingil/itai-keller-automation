@@ -66,7 +66,7 @@
   <button id="copy" class="ghost" style="display:none">העתקת הקוד</button>
 
   <div class="done" id="done">
-    <b>החיבור הושלם.</b> נשאר רק לשלוח לנו את הקוד שמופיע למטה, בוואטסאפ או במייל
+    <b>החיבור הושלם.</b> הקוד למטה כבר מסומן, אפשר פשוט ללחוץ Cmd+C. אחר כך שולחים אותו לנו בוואטסאפ או במייל
     <a href="mailto:financialbreathingil@gmail.com">financialbreathingil@gmail.com</a>,
     ואנחנו מסיימים את ההגדרה מהצד שלנו. הקוד תקף לזמן קצר, אז עדיף לשלוח עכשיו.
   </div>
@@ -118,10 +118,43 @@
 
   function showCode(value) {
     code = value;
-    out.textContent = "PAGE_CONNECT_CODE " + code;
+    out.textContent = code;
     doneBox.classList.add("show");
     copyBtn.style.display = "inline-block";
     go.textContent = "חיבור דף נוסף";
+    selectCode();                     // מסומן מראש, כך ש-Cmd+C עובד בלי כלום נוסף
+    out.scrollIntoView({block: "center"});
+  }
+
+  function selectCode() {
+    var r = document.createRange();
+    r.selectNodeContents(out);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(r);
+  }
+
+  // שתי דרכים להעתיק, כי clipboard API נכשל בשקט כשהחלון לא בפוקוס
+  function copyCode() {
+    selectCode();
+    var ok = false;
+    try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+    if (ok) { copied(); return; }
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(copied, failed);
+    } else {
+      failed();
+    }
+  }
+
+  function copied() {
+    copyBtn.textContent = "הקוד הועתק ✓";
+    setTimeout(function () { copyBtn.textContent = "העתקת הקוד"; }, 3000);
+  }
+
+  function failed() {
+    copyBtn.textContent = "ההעתקה נכשלה, הקוד מסומן: Cmd+C";
+    selectCode();
   }
 
   function readReturn() {
@@ -147,12 +180,7 @@
     return true;
   }
 
-  copyBtn.addEventListener("click", function () {
-    navigator.clipboard.writeText(code).then(function () {
-      copyBtn.textContent = "הקוד הועתק";
-      setTimeout(function () { copyBtn.textContent = "העתקת הקוד"; }, 2500);
-    });
-  });
+  copyBtn.addEventListener("click", copyCode);
 
   go.addEventListener("click", startLogin);
   if (!readReturn()) out.textContent = "מוכן. לוחצים על הכפתור.";
